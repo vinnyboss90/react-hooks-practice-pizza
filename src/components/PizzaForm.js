@@ -1,11 +1,37 @@
 import React from "react";
 
-function PizzaForm() {
+function PizzaForm({ selectedPizza, onFormChange, onEditPizzas }) {
+
+  const { id, topping, size, vegetarian } = selectedPizza
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    fetch(`http://localhost:3001/pizzas/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(selectedPizza)
+    })
+      .then(response => response.json())
+      .then(data => onEditPizzas(data))
+  }
+
+  function handleInputChange(event) {
+    onFormChange(event.target.name, event.target.value);
+  }
+
+  function handleRadioChange(event) {
+    onFormChange(event.target.name, event.target.value === "Vegetarian");
+  }
+
   return (
-    <form onSubmit={null /*handle that submit*/}>
+    <form onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="col-5">
           <input
+            onChange={handleInputChange}
+            value={topping}
             className="form-control"
             type="text"
             name="topping"
@@ -13,7 +39,7 @@ function PizzaForm() {
           />
         </div>
         <div className="col">
-          <select className="form-control" name="size">
+          <select onChange={handleInputChange} value={size} className="form-control" name="size">
             <option value="Small">Small</option>
             <option value="Medium">Medium</option>
             <option value="Large">Large</option>
@@ -26,6 +52,8 @@ function PizzaForm() {
               type="radio"
               name="vegetarian"
               value="Vegetarian"
+              onChange={handleRadioChange}
+              checked={vegetarian}
             />
             <label className="form-check-label">Vegetarian</label>
           </div>
@@ -35,6 +63,8 @@ function PizzaForm() {
               type="radio"
               name="vegetarian"
               value="Not Vegetarian"
+              onChange={handleRadioChange}
+              checked={!vegetarian}
             />
             <label className="form-check-label">Not Vegetarian</label>
           </div>
